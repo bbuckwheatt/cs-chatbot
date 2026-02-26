@@ -13,6 +13,7 @@ import {
   type SQL,
 } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
+import { revalidateTag, unstable_cache } from "next/cache";
 import postgres from "postgres";
 import type { ArtifactKind } from "@/components/artifact";
 import type { VisibilityType } from "@/components/visibility-selector";
@@ -113,6 +114,8 @@ export async function deleteChatById({ id }: { id: string }) {
       .delete(chat)
       .where(eq(chat.id, id))
       .returning();
+
+    revalidateTag(`chat-${id}`);
     return chatsDeleted;
   } catch (_error) {
     throw new ChatbotError(
@@ -229,17 +232,25 @@ export async function getChatsByUserId({
   }
 }
 
-export async function getChatById({ id }: { id: string }) {
-  try {
-    const [selectedChat] = await db.select().from(chat).where(eq(chat.id, id));
-    if (!selectedChat) {
-      return null;
-    }
-
-    return selectedChat;
-  } catch (_error) {
-    throw new ChatbotError("bad_request:database", "Failed to get chat by id");
-  }
+export function getChatById({ id }: { id: string }) {
+  return unstable_cache(
+    async () => {
+      try {
+        const [selectedChat] = await db
+          .select()
+          .from(chat)
+          .where(eq(chat.id, id));
+        return selectedChat ?? null;
+      } catch (_error) {
+        throw new ChatbotError(
+          "bad_request:database",
+          "Failed to get chat by id"
+        );
+      }
+    },
+    [`chat-${id}`],
+    { revalidate: 3600, tags: [`chat-${id}`] }
+  )();
 }
 
 export async function saveMessages({ messages }: { messages: DBMessage[] }) {
@@ -506,7 +517,12 @@ export async function updateChatVisibilityById({
   visibility: "private" | "public";
 }) {
   try {
-    return await db.update(chat).set({ visibility }).where(eq(chat.id, chatId));
+    const result = await db
+      .update(chat)
+      .set({ visibility })
+      .where(eq(chat.id, chatId));
+    revalidateTag(`chat-${chatId}`);
+    return result;
   } catch (_error) {
     throw new ChatbotError(
       "bad_request:database",
@@ -523,7 +539,12 @@ export async function updateChatTitleById({
   title: string;
 }) {
   try {
-    return await db.update(chat).set({ title }).where(eq(chat.id, chatId));
+    const result = await db
+      .update(chat)
+      .set({ title })
+      .where(eq(chat.id, chatId));
+    revalidateTag(`chat-${chatId}`);
+    return result;
   } catch (error) {
     console.warn("Failed to update title for chat", chatId, error);
     return;
