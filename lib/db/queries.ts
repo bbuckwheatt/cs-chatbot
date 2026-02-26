@@ -115,7 +115,7 @@ export async function deleteChatById({ id }: { id: string }) {
       .where(eq(chat.id, id))
       .returning();
 
-    revalidateTag(`chat-${id}`);
+    revalidateTag(`chat-${id}`, 'default');
     return chatsDeleted;
   } catch (_error) {
     throw new ChatbotError(
@@ -521,7 +521,7 @@ export async function updateChatVisibilityById({
       .update(chat)
       .set({ visibility })
       .where(eq(chat.id, chatId));
-    revalidateTag(`chat-${chatId}`);
+    revalidateTag(`chat-${chatId}`, 'default');
     return result;
   } catch (_error) {
     throw new ChatbotError(
@@ -543,7 +543,7 @@ export async function updateChatTitleById({
       .update(chat)
       .set({ title })
       .where(eq(chat.id, chatId));
-    revalidateTag(`chat-${chatId}`);
+    revalidateTag(`chat-${chatId}`, 'default');
     return result;
   } catch (error) {
     console.warn("Failed to update title for chat", chatId, error);

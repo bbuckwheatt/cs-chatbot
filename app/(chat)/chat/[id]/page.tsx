@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -9,6 +10,23 @@ import { DataStreamHandler } from "@/components/data-stream-handler";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { getChatById, getMessagesByChatId } from "@/lib/db/queries";
 import { convertToUIMessages } from "@/lib/utils";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const chat = await getChatById({ id });
+
+  if (!chat) {
+    return { title: "Chat not found" };
+  }
+
+  return {
+    title: chat.title ?? "Chat",
+  };
+}
 
 export default function Page(props: { params: Promise<{ id: string }> }) {
   return (
