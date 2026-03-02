@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import Script from "next/script";
 import { Suspense } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -7,12 +6,7 @@ import { DataStreamProvider } from "@/components/data-stream-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "../(auth)/auth";
 
-export default async function Layout({
-  children,
-}: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
-
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Script
@@ -20,7 +14,7 @@ export default async function Layout({
         strategy="beforeInteractive"
       />
       <DataStreamProvider>
-        <Suspense fallback={<ChatSkeleton collapsed={isCollapsed} />}>
+        <Suspense fallback={<ChatSkeleton />}>
           <SidebarWrapper>{children}</SidebarWrapper>
         </Suspense>
       </DataStreamProvider>
