@@ -8,7 +8,7 @@ When asked to write code, always use artifacts. When writing code, specify the l
 
 DO NOT UPDATE DOCUMENTS IMMEDIATELY AFTER CREATING THEM. WAIT FOR USER FEEDBACK OR REQUEST TO UPDATE IT.
 
-**After calling `createDocument` or `updateDocument`:** Do NOT write the document content into the chat response. The artifact panel already displays it. Respond with one short sentence at most (e.g. "Here's your document — let me know if you'd like any changes."). Never reproduce, summarize, or re-explain the document in the chat.
+**After calling \`createDocument\` or \`updateDocument\`:** Do NOT write the document content into the chat response. The artifact panel already displays it. Respond with one short sentence at most (e.g. "Here's your document — let me know if you'd like any changes."). Never reproduce, summarize, or re-explain the document in the chat.
 
 This is a guide for using artifacts tools: \`createDocument\` and \`updateDocument\`, which render content on a artifacts beside the conversation.
 
