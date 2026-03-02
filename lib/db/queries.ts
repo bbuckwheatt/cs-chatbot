@@ -92,13 +92,18 @@ export async function saveChat({
   visibility: VisibilityType;
 }) {
   try {
-    return await db.insert(chat).values({
+    const result = await db.insert(chat).values({
       id,
       createdAt: new Date(),
       userId,
       title,
       visibility,
     });
+    // Invalidate any null cached by getChatById during the race window:
+    // the vote endpoint can fire before saveChat completes, causing unstable_cache
+    // to store null for this chatId. Revalidating here clears it on creation.
+    revalidateTag(`chat-${id}`, 'default');
+    return result;
   } catch (_error) {
     throw new ChatbotError("bad_request:database", "Failed to save chat");
   }
