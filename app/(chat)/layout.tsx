@@ -7,7 +7,12 @@ import { DataStreamProvider } from "@/components/data-stream-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "../(auth)/auth";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+  children,
+}: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
+
   return (
     <>
       <Script
@@ -15,7 +20,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         strategy="beforeInteractive"
       />
       <DataStreamProvider>
-        <Suspense fallback={<ChatSkeleton />}>
+        <Suspense fallback={<ChatSkeleton collapsed={isCollapsed} />}>
           <SidebarWrapper>{children}</SidebarWrapper>
         </Suspense>
       </DataStreamProvider>

@@ -1,18 +1,21 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function ChatSkeleton() {
+export function ChatSkeleton({ collapsed = false }: { collapsed?: boolean }) {
   return (
     <div className="flex h-dvh w-full">
-      {/* Sidebar placeholder */}
-      <div className="hidden w-64 shrink-0 flex-col gap-3 border-r p-4 md:flex">
-        <Skeleton className="h-8 w-32" />
-        <div className="mt-4 flex flex-col gap-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: skeleton list
-            <Skeleton key={i} className="h-7 w-full rounded-md" />
-          ))}
+      {/* Sidebar placeholder — only render when sidebar is expanded,
+          matching the offcanvas sidebar's spacer width of 0 when collapsed */}
+      {!collapsed && (
+        <div className="hidden w-64 shrink-0 flex-col gap-3 border-r p-4 md:flex">
+          <Skeleton className="h-8 w-32" />
+          <div className="mt-4 flex flex-col gap-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: skeleton list
+              <Skeleton key={i} className="h-7 w-full rounded-md" />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Chat area placeholder */}
       <div className="flex flex-1 flex-col">
