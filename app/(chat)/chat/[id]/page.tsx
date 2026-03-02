@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -11,13 +12,17 @@ import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { getChatById, getMessagesByChatId } from "@/lib/db/queries";
 import { convertToUIMessages } from "@/lib/utils";
 
+// Request-level deduplication: generateMetadata and ChatPage both call getChatById.
+// React's cache() ensures the DB is only queried once per request even with two callers.
+const getChat = cache(({ id }: { id: string }) => getChatById({ id }));
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const chat = await getChatById({ id });
+  const chat = await getChat({ id });
 
   if (!chat) {
     return { title: "Chat not found" };
@@ -38,7 +43,7 @@ export default function Page(props: { params: Promise<{ id: string }> }) {
 
 async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const chat = await getChatById({ id });
+  const chat = await getChat({ id });
 
   if (!chat) {
     redirect("/");
