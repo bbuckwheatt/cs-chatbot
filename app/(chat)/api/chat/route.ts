@@ -36,6 +36,10 @@ import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { generateTitleFromUserMessage } from "../../actions";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
 
+// Node.js runtime (default) — required for Postgres, Redis, and long-lived
+// streams. Edge runtime would give lower cold-start latency but can't hold a
+// DB connection or run for more than ~25s. maxDuration = 60 extends the
+// Function timeout to cover long streaming AI responses and reasoning models.
 export const maxDuration = 60;
 
 function getStreamContext() {

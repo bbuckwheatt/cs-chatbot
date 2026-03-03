@@ -38,12 +38,19 @@ export function getLanguageModel(modelId: string) {
   if (isReasoningModel) {
     const gatewayModelId = modelId.replace(THINKING_SUFFIX_REGEX, "");
 
+    // Reasoning models (Claude extended thinking, Grok Code chain-of-thought)
+    // emit reasoning tokens inside <thinking> tags. extractReasoningMiddleware
+    // strips them from the visible response and exposes them separately so the
+    // UI can render them in a collapsible panel without polluting the chat text.
     return wrapLanguageModel({
       model: gateway.languageModel(gatewayModelId),
       middleware: extractReasoningMiddleware({ tagName: "thinking" }),
     });
   }
 
+  // All models route through AI Gateway: one API key for every provider,
+  // unified rate limiting, and automatic usage observability across Anthropic,
+  // OpenAI, Google, and xAI. Swapping models is a one-string change.
   return gateway.languageModel(modelId);
 }
 

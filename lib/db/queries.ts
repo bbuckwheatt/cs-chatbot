@@ -237,6 +237,14 @@ export async function getChatsByUserId({
   }
 }
 
+// getChatById is cached because chat metadata (title, visibility, owner) is
+// stable between user actions. Caching it means repeated page loads of the
+// same chat hit Next.js's data cache instead of Postgres.
+//
+// getMessagesByChatId is intentionally NOT cached: messages grow on every
+// turn, and caching them would return stale history on the next page load.
+// The SSR fetch is only for initial hydration — useChat() owns message state
+// after that. Every mutation calls revalidateTag() to keep the cache fresh.
 export function getChatById({ id }: { id: string }) {
   return unstable_cache(
     async () => {

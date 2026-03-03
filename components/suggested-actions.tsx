@@ -15,10 +15,10 @@ type SuggestedActionsProps = {
 
 function PureSuggestedActions({ chatId, sendMessage }: SuggestedActionsProps) {
   const suggestedActions = [
-    "What are the trade-offs between SSR, ISR, and CSR in Next.js?",
-    "Write a Redis-backed rate limiter in Python",
-    "How does Vercel AI Gateway simplify multi-model AI routing?",
-    "Design a caching strategy for an authenticated Next.js app",
+    "How should I measure the ROI of an AI support agent?",
+    "What's the right escalation flow when AI can't resolve a ticket?",
+    "How do I build a knowledge base that actually reduces ticket volume?",
+    "What are the biggest mistakes companies make deploying AI in customer support?",
   ];
 
   return (
