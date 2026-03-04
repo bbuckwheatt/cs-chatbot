@@ -65,5 +65,7 @@ export function getArtifactModel() {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel("artifact-model");
   }
-  return gateway.languageModel("google/gemini-2.5-flash-lite");
+  // gemini-2.0-flash is more stable than 2.5-flash-lite for nested streaming
+  // inside tool execution (artifact generation). Both are free tier.
+  return gateway.languageModel("google/gemini-2.0-flash");
 }
