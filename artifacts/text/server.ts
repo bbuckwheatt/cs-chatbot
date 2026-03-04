@@ -8,27 +8,21 @@ export const textDocumentHandler = createDocumentHandler<"text">({
   onCreateDocument: async ({ title, dataStream }) => {
     let draftContent = "";
 
-    const { fullStream } = streamText({
+    const { textStream } = streamText({
       model: getArtifactModel(),
       system:
         "Write about the given topic. Markdown is supported. Use headings wherever appropriate.",
       prompt: title,
     });
 
-    for await (const delta of fullStream) {
-      const { type } = delta;
+    for await (const text of textStream) {
+      draftContent += text;
 
-      if (type === "text-delta") {
-        const { text } = delta;
-
-        draftContent += text;
-
-        dataStream.write({
-          type: "data-textDelta",
-          data: text,
-          transient: true,
-        });
-      }
+      dataStream.write({
+        type: "data-textDelta",
+        data: text,
+        transient: true,
+      });
     }
 
     return draftContent;
@@ -36,34 +30,20 @@ export const textDocumentHandler = createDocumentHandler<"text">({
   onUpdateDocument: async ({ document, description, dataStream }) => {
     let draftContent = "";
 
-    const { fullStream } = streamText({
+    const { textStream } = streamText({
       model: getArtifactModel(),
       system: updateDocumentPrompt(document.content, "text"),
       prompt: description,
-      providerOptions: {
-        openai: {
-          prediction: {
-            type: "content",
-            content: document.content,
-          },
-        },
-      },
     });
 
-    for await (const delta of fullStream) {
-      const { type } = delta;
+    for await (const text of textStream) {
+      draftContent += text;
 
-      if (type === "text-delta") {
-        const { text } = delta;
-
-        draftContent += text;
-
-        dataStream.write({
-          type: "data-textDelta",
-          data: text,
-          transient: true,
-        });
-      }
+      dataStream.write({
+        type: "data-textDelta",
+        data: text,
+        transient: true,
+      });
     }
 
     return draftContent;
