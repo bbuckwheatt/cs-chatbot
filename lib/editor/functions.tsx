@@ -17,14 +17,26 @@ import { createSuggestionWidget, type UISuggestion } from "./suggestions";
 // renderToString only captures the initial synchronous render, so it always
 // returned empty HTML, producing a blank ProseMirror document.
 // prosemirror-markdown's MarkdownParser is synchronous and schema-aware.
-const documentMarkdownParser = new MarkdownParser(
-  documentSchema,
-  defaultMarkdownParser.tokenizer,
-  defaultMarkdownParser.tokens
-);
+//
+// Lazy-initialized to avoid a circular dependency TDZ crash in the Turbopack
+// SSR bundle: config.ts imports buildContentFromDocument from this file, and
+// this file imports documentSchema from config.ts. A module-level `new
+// MarkdownParser(documentSchema, ...)` would access documentSchema before
+// config.ts finishes evaluating. Deferring creation to first call is safe.
+let _parser: MarkdownParser | null = null;
+function getMarkdownParser(): MarkdownParser {
+  if (!_parser) {
+    _parser = new MarkdownParser(
+      documentSchema,
+      defaultMarkdownParser.tokenizer,
+      defaultMarkdownParser.tokens
+    );
+  }
+  return _parser;
+}
 
 export const buildDocumentFromContent = (content: string) => {
-  return documentMarkdownParser.parse(content);
+  return getMarkdownParser().parse(content);
 };
 
 export const buildContentFromDocument = (document: Node) => {
