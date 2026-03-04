@@ -1,21 +1,30 @@
 "use client";
 
-import { defaultMarkdownSerializer } from "prosemirror-markdown";
-import { DOMParser, type Node } from "prosemirror-model";
+import {
+  MarkdownParser,
+  defaultMarkdownParser,
+  defaultMarkdownSerializer,
+} from "prosemirror-markdown";
+import { type Node } from "prosemirror-model";
 import { Decoration, DecorationSet, type EditorView } from "prosemirror-view";
-import { renderToString } from "react-dom/server";
-
-import { Response } from "@/components/elements/response";
 
 import { documentSchema } from "./config";
 import { createSuggestionWidget, type UISuggestion } from "./suggestions";
 
+// Use a markdown parser bound to documentSchema (which includes list nodes).
+// The original approach used renderToString(<Response>) which relied on
+// Streamdown — a streaming renderer that defers output via useState/useEffect.
+// renderToString only captures the initial synchronous render, so it always
+// returned empty HTML, producing a blank ProseMirror document.
+// prosemirror-markdown's MarkdownParser is synchronous and schema-aware.
+const documentMarkdownParser = new MarkdownParser(
+  documentSchema,
+  defaultMarkdownParser.tokenizer,
+  defaultMarkdownParser.tokens
+);
+
 export const buildDocumentFromContent = (content: string) => {
-  const parser = DOMParser.fromSchema(documentSchema);
-  const stringFromMarkdown = renderToString(<Response>{content}</Response>);
-  const tempContainer = document.createElement("div");
-  tempContainer.innerHTML = stringFromMarkdown;
-  return parser.parse(tempContainer);
+  return documentMarkdownParser.parse(content);
 };
 
 export const buildContentFromDocument = (document: Node) => {
